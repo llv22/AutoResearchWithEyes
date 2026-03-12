@@ -2,12 +2,7 @@
 
 [English](README.md) | 中文版
 
-<table><tr>
-<td><img src="hero_idea.svg" alt="找 Idea" width="425"/></td>
-<td><img src="hero_implement.svg" alt="实现与部署" width="425"/></td>
-</tr></table>
-
-![Hero](hero_interaction.svg)
+![Hero](hero_combined.svg)
 
 ![分数曲线](auto_review_score_curve.png)
 
