@@ -28,7 +28,9 @@ Given a broad research direction from the user, systematically generate, validat
 
 Map the research area to understand what exists and where the gaps are.
 
-1. **Search recent literature** using WebSearch / `mcp__gemini__googleSearch`:
+1. **Scan local paper library first**: Check `papers/` and `literature/` in the project directory for existing PDFs. Read first 3 pages of relevant papers to build a baseline understanding before searching online. This avoids re-discovering what the user already knows.
+
+2. **Search recent literature** using WebSearch / `mcp__gemini__googleSearch`:
    - Top venues in the last 2 years (NeurIPS, ICML, ICLR, ACL, EMNLP, etc.)
    - Recent arXiv preprints (last 6 months)
    - Use 5+ different query formulations

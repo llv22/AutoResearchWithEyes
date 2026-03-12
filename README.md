@@ -159,7 +159,7 @@ These skills compose into a full research lifecycle. The two workflows can be us
 | 💡 [`idea-creator`](skills/idea-creator/SKILL.md) | Generate and rank research ideas given a broad direction (brainstorm + filter + validate) | Yes |
 | 🔬 [`research-review`](skills/research-review/SKILL.md) | Single-round deep review from external LLM (xhigh reasoning) | Yes |
 | 🔁 [`auto-review-loop`](skills/auto-review-loop/SKILL.md) | Autonomous multi-round review→fix→re-review loop (max 4 rounds) | Yes |
-| 📚 [`research-lit`](skills/research-lit/SKILL.md) | Search papers, analyze related work, find research gaps | No |
+| 📚 [`research-lit`](skills/research-lit/SKILL.md) | Scan local paper library + search online, analyze related work, find gaps | No |
 | 📊 [`analyze-results`](skills/analyze-results/SKILL.md) | Analyze experiment results, compute statistics, generate insights | No |
 | 👀 [`monitor-experiment`](skills/monitor-experiment/SKILL.md) | Monitor running experiments, check progress, collect results | No |
 | 🔍 [`novelty-check`](skills/novelty-check/SKILL.md) | Verify research idea novelty against recent literature before implementing | Yes |
@@ -298,6 +298,15 @@ Skills are plain Markdown files. Fork and customize:
 
 Override inline: `/idea-discovery "topic" — pilot budget: 4h per idea, wait for my approval at each step`
 
+### Literature Search (`research-lit`)
+
+| Constant | Default | Description |
+|----------|---------|-------------|
+| `PAPER_LIBRARY` | `papers/`, `literature/` | Local directories to scan for PDFs before searching online |
+| `MAX_LOCAL_PAPERS` | 20 | Max local PDFs to scan (first 3 pages each) |
+
+Override inline: `/research-lit "topic" — paper library: ~/Zotero/storage/`
+
 ### General
 
 - **Prompt templates** — tailor the review persona and evaluation criteria
@@ -305,6 +314,7 @@ Override inline: `/idea-discovery "topic" — pilot budget: 4h per idea, wait fo
 
 ## 📋 Roadmap
 
+- [ ] **Zotero MCP integration** — read papers, tags, and annotations directly from Zotero library
 - [ ] **GLM-5 (executor) + Minimax-2.5 (reviewer)** — alternative cross-model pair, same architecture as Claude Code + Codex
 - [ ] More executor × reviewer combinations (Gemini, DeepSeek, etc.)
 

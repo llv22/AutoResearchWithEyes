@@ -121,7 +121,7 @@
 | 💡 [`idea-creator`](skills/idea-creator/SKILL.md) | 给定研究方向，自动生成、筛选、排序研究 idea | 是 |
 | 🔬 [`research-review`](skills/research-review/SKILL.md) | 单轮深度评审（外部 LLM，xhigh 推理） | 是 |
 | 🔁 [`auto-review-loop`](skills/auto-review-loop/SKILL.md) | 多轮自动 review→修复→再 review 循环（最多 4 轮） | 是 |
-| 📚 [`research-lit`](skills/research-lit/SKILL.md) | 搜论文、分析相关工作、找研究空白 | 否 |
+| 📚 [`research-lit`](skills/research-lit/SKILL.md) | 先扫本地论文库 + 再搜外部，分析相关工作、找空白 | 否 |
 | 📊 [`analyze-results`](skills/analyze-results/SKILL.md) | 分析实验结果、统计、生成对比表 | 否 |
 | 👀 [`monitor-experiment`](skills/monitor-experiment/SKILL.md) | 监控实验进度、收集结果 | 否 |
 | 🔍 [`novelty-check`](skills/novelty-check/SKILL.md) | 查新：验证研究 idea 是否已有人做过 | 是 |
@@ -245,6 +245,15 @@ Skills 就是普通的 Markdown 文件，fork 后随意改：
 
 行内覆盖：`/idea-discovery "方向" — pilot budget: 4h per idea, 每步等我确认`
 
+### 文献搜索（`research-lit`）
+
+| 常量 | 默认值 | 说明 |
+|------|--------|------|
+| `PAPER_LIBRARY` | `papers/`, `literature/` | 本地论文目录，搜外部之前先扫这里的 PDF |
+| `MAX_LOCAL_PAPERS` | 20 | 最多扫描多少本地 PDF（每篇读前 3 页） |
+
+行内覆盖：`/research-lit "方向" — paper library: ~/Zotero/storage/`
+
 ### 通用
 
 - **Prompt 模板** — 定制评审人格和评估标准
@@ -252,6 +261,7 @@ Skills 就是普通的 Markdown 文件，fork 后随意改：
 
 ## 📋 Roadmap
 
+- [ ] **Zotero MCP 集成** — 直接读取 Zotero 论文库的论文、标签和批注
 - [ ] **GLM-5（执行者）+ Minimax-2.5（评审者）** — 与 Claude Code + Codex 平行的跨模型组合
 - [ ] 更多执行者 × 评审者组合（Gemini、DeepSeek 等）
 
