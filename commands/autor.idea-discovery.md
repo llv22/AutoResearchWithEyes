@@ -1,7 +1,7 @@
 ---
 name: autor.idea-discovery
 description: "Workflow 1: Full idea discovery pipeline. Orchestrates research-lit → idea-creator → novelty-check → research-reviewer to go from a broad research direction to validated, pilot-tested ideas. Use when user says \"idea discovery pipeline\" or wants the complete idea exploration workflow."
-argument-hint: [research-direction]
+argument-hint: [research-direction or path/to/spec.md]
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Agent, Skill, mcp__codex__codex, mcp__codex__codex-reply
 ---
 
@@ -27,6 +27,20 @@ All constants (PILOT_MAX_HOURS, PILOT_TIMEOUT_HOURS, MAX_PILOT_IDEAS, MAX_TOTAL_
 > Override inline, e.g., `/autor.idea-discovery "topic" — pilot budget: 4h per idea, 20h total` or `/autor.idea-discovery "topic" — wait for my approval at each step`.
 
 ## Pipeline
+
+### Phase 0: Argument Resolution
+
+Before starting the pipeline, determine whether `$ARGUMENTS` is a **file path** or a **plain text direction**.
+
+1. **Detect file path**: Check if `$ARGUMENTS` (after trimming quotes/whitespace) looks like a file path — i.e., ends with `.md`, `.txt`, `.pdf`, or contains `/` or `\`.
+2. **If it's a file path**:
+   - Read the file using the `Read` tool.
+   - Extract the research direction, context, constraints, and any pre-specified ideas from the file content.
+   - Use the file content as the **RESOLVED_DIRECTION** for all subsequent phases.
+   - Preserve any inline overrides appended after the path (e.g., `tests/spec.md — pilot budget: 4h`): split on ` — ` and pass overrides through.
+3. **If it's plain text**: Use `$ARGUMENTS` directly as the **RESOLVED_DIRECTION**.
+
+> From this point forward, all references to `$ARGUMENTS` in the pipeline mean **RESOLVED_DIRECTION** (the file content or the original text).
 
 ### Phase 1: Literature Survey
 

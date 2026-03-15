@@ -1,13 +1,27 @@
 ---
 name: research-lit
 description: Search and analyze research papers, find related work, summarize key ideas. Use when user says "find papers", "related work", "literature review", "what does this paper say", or needs to understand academic papers.
-argument-hint: [paper-topic-or-url]
+argument-hint: [paper-topic-or-url-or-path/to/spec.md]
 allowed-tools: Bash(*), Read, Glob, Grep, WebSearch, WebFetch, Write, Agent
 ---
 
 # Research Literature Review
 
 Research topic: $ARGUMENTS
+
+## Step 0: Argument Resolution
+
+Before starting the workflow, determine whether `$ARGUMENTS` is a **file path** or a **plain text topic**.
+
+1. **Detect file path**: Check if `$ARGUMENTS` (after trimming quotes/whitespace) looks like a file path — i.e., ends with `.md`, `.txt`, `.pdf`, or contains `/` or `\`.
+2. **If it's a file path**:
+   - Read the file using the `Read` tool.
+   - Extract the research topic, context, constraints, and any scope guidance from the file content.
+   - Use the file content as the **RESOLVED_TOPIC** for all subsequent steps.
+   - Preserve any inline overrides appended after the path (e.g., `spec.md — sources: local`): split on ` — ` and pass overrides through.
+3. **If it's plain text**: Use `$ARGUMENTS` directly as the **RESOLVED_TOPIC**.
+
+> From this point forward, all references to `$ARGUMENTS` in the workflow mean **RESOLVED_TOPIC** (the file content or the original text).
 
 ## Constants
 

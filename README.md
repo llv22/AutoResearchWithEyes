@@ -25,6 +25,7 @@ codex auth login
 # 3. Launch Claude Code — skills and commands are auto-discovered
 claude
 > /autor.idea-discovery "your research direction"      # Command: literature → brainstorm → validate
+> /autor.idea-discovery tests/0_idea_discovery.md      # Or pass a spec file (auto-reads content)
 > /autor.auto-review-loop                              # Command: review → fix → re-review overnight
 > /autor.paper-writing "NARRATIVE_REPORT.md"           # Command: narrative → polished PDF
 > /autor.research-pipeline "your research direction"   # Command: full end-to-end pipeline
@@ -111,7 +112,7 @@ These commands compose skills + agents into a full research lifecycle. Use indep
 
 > **"What's the state of the art? Where are the gaps?"**
 
-Give a research direction — the command handles the rest:
+Give a research direction (plain text or a path to a spec file) — the command handles the rest:
 
 1. **Survey** the landscape via `research-lit` (arXiv TeX sources, local PDFs, web search)
 2. **Brainstorm** 8-12 concrete ideas via `idea-creator` (GPT-5.4 xhigh)
@@ -355,14 +356,16 @@ Each `templates/<venue>/README.md` has specific download instructions.
 ### Usage
 
 ```
-# Commands (workflow orchestrators)
-> /autor.idea-discovery "your research direction"      # Workflow 1
+# Commands (workflow orchestrators) — accept plain text or file paths
+> /autor.idea-discovery "your research direction"      # Workflow 1 (plain text)
+> /autor.idea-discovery tests/0_idea_discovery.md      # Workflow 1 (from spec file)
 > /autor.auto-review-loop "your paper topic"           # Workflow 2
 > /autor.paper-writing "NARRATIVE_REPORT.md"           # Workflow 3
 > /autor.research-pipeline "your research direction"   # Full pipeline
 
-# Individual skills
+# Individual skills — also accept file paths
 > /research-lit "topic"                          # just literature survey
+> /research-lit path/to/spec.md                  # literature survey from spec file
 > /idea-creator "topic"                          # just brainstorm
 > /novelty-check "specific idea"                 # just novelty verification
 > /run-experiment train.py --lr 1e-4 --epochs 100
@@ -518,17 +521,34 @@ Don't have Claude / OpenAI API? Swap in other models — same cross-model archit
 
 ---
 
-## Community
+## Citation
 
-Join the WeChat group for discussion on Claude Code + AI-driven research workflows:
+```latext
 
-<img src="docs/wechat_group.jpg" alt="WeChat Group QR Code" width="300">
+@misc{autoresearchwitheyes,
+  author       = {Chris Yuhao Liu, Lei Ding},
+  title        = {AutoResearchWithEyes: Human-in-the-loop autonomous research with LLM agents},
+  year         = {2026},
+  howpublished = {\url{https://github.com/llv22/AutoResearchWithEyes}},
+  note         = {GitHub repository}
+}
 
-## Star History
+@misc{yang2026aris,
+    author       = {Yang, Ruofeng and Li, Yongcan and Li, Shuai},
+    title        = {ARIS: Fully Autonomous Research via Adversarial Multi-Agent Collaboration},
+    year         = {2026},
+    organization = {GitHub},
+    url          = {https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep},
+}
+@misc{karpathy2026autoresearch,
+  author       = {Andrej Karpathy},
+  title        = {autoresearch: AI agents running research on single-GPU nanochat training automatically},
+  year         = {2026},
+  howpublished = {\url{https://github.com/karpathy/autoresearch}},
+  note         = {GitHub repository}
+}
 
-![GitHub stars](https://img.shields.io/github/stars/llv23/AutoResearchWithEyes?style=social)
-
-[![Star History Chart](https://api.star-history.com/svg?repos=llv23/AutoResearchWithEyes&type=Date&v=20260312&r=2)](https://star-history.com/#llv23/AutoResearchWithEyes&Date)
+```
 
 ## Acknowledgements
 
@@ -544,6 +564,7 @@ Join the WeChat group for discussion on Claude Code + AI-driven research workflo
 **Community**
 - [awesome-agent-skills](https://github.com/VoltAgent/awesome-agent-skills) — Curated list of Claude Code skills (featured)
 
-## License
 
-MIT
+## Author
+
+By Chris Yuhao Liu, Lei Ding(Orlando) 2026@March.
