@@ -1,0 +1,19 @@
+{
+  "name": "auto-research-with-eyes",
+  "version": "2.0.0",
+  "description": "Autonomous ML research pipeline: idea discovery → experiment → review → paper writing",
+  "author": {
+    "name": "llv23"
+  },
+  "repository": "https://github.com/llv23/AutoResearchWithEyes",
+  "license": "MIT",
+  "keywords": [
+    "research",
+    "ml",
+    "paper-writing",
+    "experiments",
+    "review",
+    "cross-model",
+    "codex-mcp"
+  ]
+}

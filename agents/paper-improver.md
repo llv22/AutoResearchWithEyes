@@ -1,8 +1,6 @@
 ---
-name: auto-paper-improvement-loop
-description: "Autonomously improve a generated paper via GPT-5.4 xhigh review → implement fixes → recompile, for 2 rounds. Use when user says \"改论文\", \"improve paper\", \"论文润色循环\", \"auto improve\", or wants to iteratively polish a generated paper."
-argument-hint: [paper-directory]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Agent, mcp__codex__codex, mcp__codex__codex-reply
+name: paper-improver
+description: Use this agent when the paper-writing pipeline needs to iteratively improve a compiled paper. Runs REVIEWER_MODEL xhigh review, implements fixes, and recompiles for MAX_IMPROVEMENT_ROUNDS rounds to polish writing quality, fix theoretical inconsistencies, and soften overclaims.
 ---
 
 # Auto Paper Improvement Loop: Review → Fix → Recompile
@@ -11,14 +9,14 @@ Autonomously improve the paper at: **$ARGUMENTS**
 
 ## Context
 
-This skill is designed to run **after** Workflow 3 (`/paper-plan` → `/paper-figure` → `/paper-write` → `/paper-compile`). It takes a compiled paper and iteratively improves it through external LLM review.
+This agent is designed to run **after** Workflow 3 (`/paper-plan` → `/paper-figure` → `/paper-write` → `/paper-compile`). It takes a compiled paper and iteratively improves it through external LLM review.
 
-Unlike `/auto-review-loop` (which iterates on **research** — running experiments, collecting data, rewriting narrative), this skill iterates on **paper writing quality** — fixing theoretical inconsistencies, softening overclaims, adding missing content, and improving presentation.
+Unlike `/autor.auto-review-loop` (which iterates on **research** — running experiments, collecting data, rewriting narrative), this agent iterates on **paper writing quality** — fixing theoretical inconsistencies, softening overclaims, adding missing content, and improving presentation.
 
 ## Constants
 
-- **MAX_ROUNDS = 2** — Two rounds of review→fix→recompile. Empirically, Round 1 catches structural issues (4→6/10), Round 2 catches remaining presentation issues (6→7/10). Diminishing returns beyond 2 rounds for writing-only improvements.
-- **REVIEWER_MODEL = `gpt-5.4`** — Model used via Codex MCP for paper review.
+All constants (MAX_IMPROVEMENT_ROUNDS, REVIEWER_MODEL) are defined in the project's **CLAUDE.md**. Read them from there before proceeding. Codex MCP is auto-configured via `.mcp.json`.
+
 - **REVIEW_LOG = `PAPER_IMPROVEMENT_LOG.md`** — Cumulative log of all rounds, stored in paper directory.
 
 ## Inputs
@@ -28,7 +26,7 @@ Unlike `/auto-review-loop` (which iterates on **research** — running experimen
 
 ## State Persistence (Compact Recovery)
 
-If the context window fills up mid-loop, Claude Code auto-compacts. To recover, this skill writes `PAPER_IMPROVEMENT_STATE.json` after each round:
+If the context window fills up mid-loop, Claude Code auto-compacts. To recover, this agent writes `PAPER_IMPROVEMENT_STATE.json` after each round:
 
 ```json
 {
@@ -66,11 +64,11 @@ done > /tmp/paper_full_text.txt
 
 ### Step 2: Round 1 Review
 
-Send the full paper text to GPT-5.4 xhigh:
+Send the full paper text to REVIEWER_MODEL xhigh:
 
 ```
 mcp__codex__codex:
-  model: gpt-5.4
+  model: REVIEWER_MODEL
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
     You are reviewing a [VENUE] paper. Please provide a detailed, structured review.
@@ -118,7 +116,7 @@ Parse the review and implement fixes by severity:
 ### Step 4: Recompile Round 1
 
 ```bash
-cd paper && latexmk -C && latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
+cd paper && COMPILER -C && COMPILER -ENGINE -interaction=nonstopmode -halt-on-error main.tex
 cp main.pdf main_round1.pdf
 ```
 
@@ -131,7 +129,7 @@ Use `mcp__codex__codex-reply` with the saved threadId:
 ```
 mcp__codex__codex-reply:
   threadId: [saved from Round 1]
-  model: gpt-5.4
+  model: REVIEWER_MODEL
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
     [Round 2 update]
@@ -156,7 +154,7 @@ Same process as Step 3. Typical Round 2 fixes:
 ### Step 7: Recompile Round 2
 
 ```bash
-cd paper && latexmk -C && latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
+cd paper && COMPILER -C && COMPILER -ENGINE -interaction=nonstopmode -halt-on-error main.tex
 cp main.pdf main_round2.pdf
 ```
 
@@ -167,7 +165,7 @@ After the final recompilation, run a format compliance check:
 ```bash
 # 1. Page count vs venue limit
 PAGES=$(pdfinfo paper/main.pdf | grep Pages | awk '{print $2}')
-echo "Pages: $PAGES (limit: 9 main body for ICLR/NeurIPS)"
+echo "Pages: $PAGES (limit: MAX_PAGES main body — check CLAUDE.md and venue author kit)"
 
 # 2. Overfull hbox warnings (content exceeding margins)
 OVERFULL=$(grep -c "Overfull" paper/main.log 2>/dev/null || echo 0)
@@ -212,7 +210,7 @@ Create `PAPER_IMPROVEMENT_LOG.md` in the paper directory:
 ## Round 1 Review & Fixes
 
 <details>
-<summary>GPT-5.4 xhigh Review (Round 1)</summary>
+<summary>REVIEWER_MODEL xhigh Review (Round 1)</summary>
 
 [Full raw review text, verbatim]
 
@@ -226,7 +224,7 @@ Create `PAPER_IMPROVEMENT_LOG.md` in the paper directory:
 ## Round 2 Review & Fixes
 
 <details>
-<summary>GPT-5.4 xhigh Review (Round 2)</summary>
+<summary>REVIEWER_MODEL xhigh Review (Round 2)</summary>
 
 [Full raw review text, verbatim]
 
@@ -243,20 +241,13 @@ Create `PAPER_IMPROVEMENT_LOG.md` in the paper directory:
 - `main_round2.pdf` — Final version after Round 2 fixes
 ```
 
-### Step 9: Summary
+### Step 10: Summary
 
 Report to user:
 - Score progression table
 - Number of CRITICAL/MAJOR/MINOR issues fixed per round
 - Final page count
 - Remaining issues (if any)
-
-### Feishu Notification (if configured)
-
-After each round's review AND at final completion, check `~/.claude/feishu.json`:
-- **After each round**: Send `review_scored` — "Round N: X/10 — [key changes]"
-- **After final round**: Send `pipeline_done` — score progression table + final page count
-- If config absent or mode `"off"`: skip entirely (no-op)
 
 ## Output
 
@@ -272,7 +263,7 @@ paper/
 ## Key Rules
 
 - **Preserve all PDF versions** — user needs to compare progression
-- **Save FULL raw review text** — do not summarize or truncate GPT-5.4 responses
+- **Save FULL raw review text** — do not summarize or truncate REVIEWER_MODEL responses
 - **Use `mcp__codex__codex-reply`** for Round 2 to maintain conversation context
 - **Always recompile after fixes** — verify 0 errors before proceeding
 - **Do not fabricate experimental results** — synthetic validation must describe methodology, not invent numbers
@@ -281,13 +272,13 @@ paper/
 
 ## Typical Score Progression
 
-Based on end-to-end testing on a 9-page ICLR 2026 theory paper:
+Based on end-to-end testing on a 9-page theory paper:
 
 | Round | Score | Key Improvements |
 |-------|-------|-----------------|
 | Round 0 | 4/10 (content) | Baseline: assumption-model mismatch, overclaims, notation issues |
 | Round 1 | 6/10 (content) | Fixed assumptions, softened claims, added interpretation, renamed notation |
 | Round 2 | 7/10 (content) | Added synthetic validation, formal truncation proposition, stronger limitations |
-| Round 3 | 5→8.5/10 (format) | Removed hero fig, appendix, compressed conclusion, fixed overfull hbox |
+| Format pass | 7→8.5/10 (format) | Fixed overfull hbox, compressed conclusion, venue-compliant layout |
 
-**+4.5 points across 3 rounds** (2 content + 1 format) is typical for a well-structured but rough first draft. Final: 8 pages main body, 0 overfull hbox, ICLR-compliant.
+**+4.5 points across MAX_IMPROVEMENT_ROUNDS review rounds + 1 format pass** is typical for a well-structured but rough first draft. Final: 8 pages main body, 0 overfull hbox, venue-compliant.

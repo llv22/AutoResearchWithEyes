@@ -11,9 +11,7 @@ Generate a structured, section-by-section paper outline from: **$ARGUMENTS**
 
 ## Constants
 
-- **REVIEWER_MODEL = `gpt-5.4`** — Model used via Codex MCP for outline review. Must be an OpenAI model.
-- **TARGET_VENUE = `ICLR`** — Default venue. User can override (e.g., `/paper-plan "topic" — venue: NeurIPS`). Supported: `ICLR`, `NeurIPS`, `ICML`.
-- **MAX_PAGES** — Main body page limit, measured from first page to end of Conclusion section (excluding references, appendix, and acknowledgements). ICLR=9, NeurIPS=9, ICML=8.
+All constants (REVIEWER_MODEL, VENUE, TEMPLATE_DIR) are defined in the project's **CLAUDE.md**. Read them from there before proceeding. Page limits are venue-dependent — see CLAUDE.md.
 
 ## Inputs
 
@@ -48,7 +46,7 @@ Build a **Claims-Evidence Matrix**:
 
 ### Step 2: Determine Paper Type and Structure
 
-Based on TARGET_VENUE and paper content, classify and select structure.
+Based on VENUE (from CLAUDE.md) and paper content, classify and select structure.
 
 **IMPORTANT**: The section count is FLEXIBLE (5-8 sections). Choose what fits the content best. The templates below are starting points, not rigid constraints.
 
@@ -73,7 +71,7 @@ Based on TARGET_VENUE and paper content, classify and select structure.
 7. Conclusion (0.5 pages)
 — Total: 9 pages
 ```
-Theory papers often need 7 sections (splitting theory into estimation + optimization, or setup + analysis). The total page budget MUST sum to MAX_PAGES.
+Theory papers often need 7 sections (splitting theory into estimation + optimization, or setup + analysis). The total page budget MUST sum to the page limit for the target venue (see CLAUDE.md).
 
 Theory papers should:
 - Include **proof sketch** locations (not just theorem statements)
@@ -180,11 +178,11 @@ For each section, list required citations:
 
 ### Step 6: Cross-Review with REVIEWER_MODEL
 
-Send the complete outline to GPT-5.4 xhigh for feedback:
+Send the complete outline to REVIEWER_MODEL xhigh for feedback:
 
 ```
 mcp__codex__codex:
-  model: gpt-5.4
+  model: REVIEWER_MODEL
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
     Review this paper outline for a [VENUE] submission.

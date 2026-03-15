@@ -1,6 +1,6 @@
 ---
-name: idea-discovery
-description: "Workflow 1: Full idea discovery pipeline. Orchestrates research-lit → idea-creator → novelty-check → research-review to go from a broad research direction to validated, pilot-tested ideas. Use when user says \"找idea全流程\", \"idea discovery pipeline\", \"从零开始找方向\", or wants the complete idea exploration workflow."
+name: autor.idea-discovery
+description: "Workflow 1: Full idea discovery pipeline. Orchestrates research-lit → idea-creator → novelty-check → research-reviewer to go from a broad research direction to validated, pilot-tested ideas. Use when user says \"idea discovery pipeline\" or wants the complete idea exploration workflow."
 argument-hint: [research-direction]
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Agent, Skill, mcp__codex__codex, mcp__codex__codex-reply
 ---
@@ -14,7 +14,7 @@ Orchestrate a complete idea discovery workflow for: **$ARGUMENTS**
 This skill chains four sub-skills into a single automated pipeline:
 
 ```
-/research-lit → /idea-creator → /novelty-check → /research-review
+/research-lit → /idea-creator → /novelty-check → research-reviewer agent
   (survey)      (brainstorm)    (verify novel)    (critical feedback)
 ```
 
@@ -22,14 +22,9 @@ Each phase builds on the previous one's output. The final deliverable is a valid
 
 ## Constants
 
-- **PILOT_MAX_HOURS = 2** — Skip any pilot experiment estimated to take > 2 hours per GPU. Flag as "needs manual pilot" in the report.
-- **PILOT_TIMEOUT_HOURS = 3** — Hard timeout: kill any running pilot that exceeds 3 hours. Collect partial results if available.
-- **MAX_PILOT_IDEAS = 3** — Run pilots for at most 3 top ideas in parallel. Additional ideas are validated on paper only.
-- **MAX_TOTAL_GPU_HOURS = 8** — Total GPU budget across all pilots. If exceeded, skip remaining pilots and note in report.
-- **AUTO_PROCEED = true** — If user doesn't respond at a checkpoint, automatically proceed with the best option after presenting results. Set to `false` to always wait for explicit user confirmation.
-- **REVIEWER_MODEL = `gpt-5.4`** — Model used via Codex MCP. Must be an OpenAI model (e.g., `gpt-5.4`, `o3`, `gpt-4o`). Passed to sub-skills.
+All constants (PILOT_MAX_HOURS, PILOT_TIMEOUT_HOURS, MAX_PILOT_IDEAS, MAX_TOTAL_GPU_HOURS, AUTO_PROCEED, REVIEWER_MODEL) are defined in the project's **CLAUDE.md**. Read them from there before proceeding.
 
-> 💡 These are defaults. Override by telling the skill, e.g., `/idea-discovery "topic" — pilot budget: 4h per idea, 20h total` or `/idea-discovery "topic" — wait for my approval at each step`.
+> Override inline, e.g., `/autor.idea-discovery "topic" — pilot budget: 4h per idea, 20h total` or `/autor.idea-discovery "topic" — wait for my approval at each step`.
 
 ## Pipeline
 
@@ -47,10 +42,10 @@ Invoke `/research-lit` to map the research landscape:
 - Identify structural gaps and recurring limitations
 - Output a literature summary (saved to working notes)
 
-**🚦 Checkpoint:** Present the landscape summary to the user. Ask:
+**Checkpoint:** Present the landscape summary to the user. Ask:
 
 ```
-📚 Literature survey complete. Here's what I found:
+Literature survey complete. Here's what I found:
 - [key findings, gaps, open problems]
 
 Does this match your understanding? Should I adjust the scope before generating ideas?
@@ -69,17 +64,17 @@ Invoke `/idea-creator` with the landscape context:
 ```
 
 **What this does:**
-- Brainstorm 8-12 concrete ideas via GPT-5.4 xhigh
+- Brainstorm 8-12 concrete ideas via REVIEWER_MODEL xhigh
 - Filter by feasibility, compute cost, quick novelty search
 - Deep validate top ideas (full novelty check + devil's advocate)
 - Run parallel pilot experiments on available GPUs (top 2-3 ideas)
 - Rank by empirical signal
 - Output `IDEA_REPORT.md`
 
-**🚦 Checkpoint:** Present `IDEA_REPORT.md` ranked ideas to the user. Ask:
+**Checkpoint:** Present `IDEA_REPORT.md` ranked ideas to the user. Ask:
 
 ```
-💡 Generated X ideas, filtered to Y, piloted Z. Top results:
+Generated X ideas, filtered to Y, piloted Z. Top results:
 
 1. [Idea 1] — Pilot: POSITIVE (+X%)
 2. [Idea 2] — Pilot: WEAK POSITIVE (+Y%)
@@ -104,7 +99,7 @@ For each top idea (positive pilot signal), run a thorough novelty check:
 
 **What this does:**
 - Multi-source literature search (arXiv, Scholar, Semantic Scholar)
-- Cross-verify with GPT-5.4 xhigh
+- Cross-verify with REVIEWER_MODEL xhigh
 - Check for concurrent work (last 3-6 months)
 - Identify closest existing work and differentiation points
 
@@ -114,12 +109,14 @@ For each top idea (positive pilot signal), run a thorough novelty check:
 
 For the surviving top idea(s), get brutal feedback:
 
+Invoke the `research-reviewer` agent with the top idea context:
+
 ```
-/research-review "[top idea with hypothesis + pilot results]"
+Use the research-reviewer agent for: "[top idea with hypothesis + pilot results]"
 ```
 
 **What this does:**
-- GPT-5.4 xhigh acts as a senior reviewer (NeurIPS/ICML level)
+- REVIEWER_MODEL xhigh acts as a senior reviewer (NeurIPS/ICML level)
 - Scores the idea, identifies weaknesses, suggests minimum viable improvements
 - Provides concrete feedback on experimental design
 
@@ -134,7 +131,7 @@ Finalize `IDEA_REPORT.md` with all accumulated information:
 
 **Direction**: $ARGUMENTS
 **Date**: [today]
-**Pipeline**: research-lit → idea-creator → novelty-check → research-review
+**Pipeline**: research-lit → idea-creator → novelty-check → research-reviewer
 
 ## Executive Summary
 [2-3 sentences: best idea, key evidence, recommended next step]
@@ -145,11 +142,11 @@ Finalize `IDEA_REPORT.md` with all accumulated information:
 ## Ranked Ideas
 [from Phase 2, updated with Phase 3-4 results]
 
-### 🏆 Idea 1: [title] — RECOMMENDED
+### Idea 1: [title] — RECOMMENDED
 - Pilot: POSITIVE (+X%)
 - Novelty: CONFIRMED (closest: [paper], differentiation: [what's different])
 - Reviewer score: X/10
-- Next step: implement full experiment → /auto-review-loop
+- Next step: implement full experiment → /autor.auto-review-loop
 
 ### Idea 2: [title] — BACKUP
 ...
@@ -160,8 +157,8 @@ Finalize `IDEA_REPORT.md` with all accumulated information:
 ## Next Steps
 - [ ] Implement Idea 1
 - [ ] /run-experiment to deploy full-scale experiments
-- [ ] /auto-review-loop to iterate until submission-ready
-- [ ] Or invoke /research-pipeline for the complete end-to-end flow
+- [ ] /autor.auto-review-loop to iterate until submission-ready
+- [ ] Or invoke /autor.research-pipeline for the complete end-to-end flow
 ```
 
 ## Key Rules
@@ -172,17 +169,16 @@ Finalize `IDEA_REPORT.md` with all accumulated information:
 - **Empirical signal > theoretical appeal.** An idea with a positive pilot outranks a "sounds great" idea without evidence.
 - **Document everything.** Dead ends are just as valuable as successes for future reference.
 - **Be honest with the reviewer.** Include negative results and failed pilots in the review prompt.
-- **Feishu notifications are optional.** If `~/.claude/feishu.json` exists, send `checkpoint` at each phase transition and `pipeline_done` at final report. If absent/off, skip silently.
 
 ## Composing with Workflow 2
 
 After this pipeline produces a validated top idea:
 
 ```
-/idea-discovery "direction"         ← you are here (Workflow 1)
+/autor.idea-discovery "direction"         ← you are here (Workflow 1)
 implement                           ← write code for the top idea
 /run-experiment                     ← deploy full-scale experiments
-/auto-review-loop "top idea"        ← Workflow 2: iterate until submission-ready
+/autor.auto-review-loop "top idea"        ← Workflow 2: iterate until submission-ready
 
-Or use /research-pipeline for the full end-to-end flow.
+Or use /autor.research-pipeline for the full end-to-end flow.
 ```

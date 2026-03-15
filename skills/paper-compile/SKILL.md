@@ -11,11 +11,9 @@ Compile the LaTeX paper and fix any issues: **$ARGUMENTS**
 
 ## Constants
 
-- **COMPILER = `latexmk`** — LaTeX build tool. Handles multi-pass compilation automatically.
-- **ENGINE = `pdflatex`** — LaTeX engine. Options: `pdflatex` (default), `xelatex` (for CJK/custom fonts), `lualatex`.
-- **MAX_COMPILE_ATTEMPTS = 3** — Maximum attempts to fix errors and recompile.
+All constants (COMPILER, ENGINE, MAX_COMPILE_ATTEMPTS, VENUE) are defined in the project's **CLAUDE.md**. Read them from there before proceeding. Page limits are venue-dependent — see CLAUDE.md.
+
 - **PAPER_DIR = `paper/`** — Directory containing LaTeX source files.
-- **MAX_PAGES** — Main body page limit (to end of Conclusion, excluding references & appendix). ICLR=9, NeurIPS=9, ICML=8.
 
 ## Workflow
 
@@ -242,10 +240,4 @@ For conference submission, additional checks:
 - **Font embedding is critical** — some venues reject PDFs with non-embedded fonts
 - **Page count = main body to Conclusion** — this is the metric that matters for submission
 
-## Common Venue Requirements
-
-| Venue | Style File | Citation | Page Limit (main body) | Submission |
-|-------|-----------|----------|------------------------|------------|
-| ICLR 2026 | `iclr2026_conference.sty` | `natbib` (`\citep`/`\citet`) | 9 pages (to Conclusion end) | OpenReview |
-| NeurIPS 2025 | `neurips_2025.sty` | `natbib` (`\citep`/`\citet`) | 9 pages (to Conclusion end) | OpenReview |
-| ICML 2025 | `icml2025.sty` | `natbib` (`\citep`/`\citet`) | 8 pages (to Conclusion end) | OpenReview |
+Venue-specific requirements (style files, citation format, page limits, submission platform) are centralized in the project's **CLAUDE.md**.

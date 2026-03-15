@@ -1,8 +1,6 @@
 ---
-name: research-review
-description: Get a deep critical review of research from GPT via Codex MCP. Use when user says "review my research", "help me review", "get external review", or wants critical feedback on research ideas, papers, or experimental results.
-argument-hint: [topic-or-scope]
-allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, Agent, mcp__codex__codex, mcp__codex__codex-reply
+name: research-reviewer
+description: Use this agent when the idea-discovery pipeline needs external critical feedback on research ideas, papers, or experimental results. Invokes REVIEWER_MODEL via Codex MCP with xhigh reasoning to act as a senior ML reviewer.
 ---
 
 # Research Review via Codex MCP (xhigh reasoning)
@@ -11,17 +9,9 @@ Get a multi-round critical review of research work from an external LLM with max
 
 ## Constants
 
-- REVIEWER_MODEL = `gpt-5.4` — Model used via Codex MCP. Must be an OpenAI model (e.g., `gpt-5.4`, `o3`, `gpt-4o`)
+REVIEWER_MODEL is defined in the project's **CLAUDE.md**. Read it from there before proceeding. Codex MCP is auto-configured via `.mcp.json`.
 
 ## Context: $ARGUMENTS
-
-## Prerequisites
-
-- **Codex MCP Server** configured in Claude Code:
-  ```bash
-  claude mcp add codex -s user -- codex mcp-server
-  ```
-- This gives Claude Code access to `mcp__codex__codex` and `mcp__codex__codex-reply` tools
 
 ## Workflow
 
@@ -36,6 +26,7 @@ Send a detailed prompt with xhigh reasoning:
 
 ```
 mcp__codex__codex:
+  model: REVIEWER_MODEL
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
     [Full research context + specific questions]

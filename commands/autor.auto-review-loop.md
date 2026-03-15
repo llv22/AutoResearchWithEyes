@@ -1,5 +1,5 @@
 ---
-name: auto-review-loop
+name: autor.auto-review-loop
 description: Autonomous multi-round research review loop. Repeatedly reviews via Codex MCP, implements fixes, and re-reviews until positive assessment or max rounds reached. Use when user says "auto review loop", "review until it passes", or wants autonomous iterative improvement.
 argument-hint: [topic-or-scope]
 allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, Agent, Skill, mcp__codex__codex, mcp__codex__codex-reply
@@ -13,10 +13,9 @@ Autonomously iterate: review → implement fixes → re-review, until the extern
 
 ## Constants
 
-- MAX_ROUNDS = 4
-- POSITIVE_THRESHOLD: score >= 6/10, or verdict contains "accept", "sufficient", "ready for submission"
+All constants (MAX_ROUNDS, POSITIVE_THRESHOLD, REVIEWER_MODEL) are defined in the project's **CLAUDE.md**. Read them from there before proceeding.
+
 - REVIEW_DOC: `AUTO_REVIEW.md` in project root (cumulative log)
-- REVIEWER_MODEL = `gpt-5.4` — Model used via Codex MCP. Must be an OpenAI model (e.g., `gpt-5.4`, `o3`, `gpt-4o`)
 
 ## State Persistence (Compact Recovery)
 
@@ -66,6 +65,7 @@ Send comprehensive context to the external reviewer:
 
 ```
 mcp__codex__codex:
+  model: REVIEWER_MODEL
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
     [Round N/MAX_ROUNDS of autonomous review loop]
@@ -94,14 +94,7 @@ Then extract structured fields:
 - **Verdict** ("ready" / "almost" / "not ready")
 - **Action items** (ranked list of fixes)
 
-**STOP CONDITION**: If score >= 6 AND verdict contains "ready" or "almost" → stop loop, document final state.
-
-#### Feishu Notification (if configured)
-
-After parsing the score, check if `~/.claude/feishu.json` exists and mode is not `"off"`:
-- Send a `review_scored` notification: "Round N: X/10 — [verdict]" with top 3 weaknesses
-- If **interactive** mode and verdict is "almost": send as checkpoint, wait for user reply on whether to continue or stop
-- If config absent or mode off: skip entirely (no-op)
+**STOP CONDITION**: If POSITIVE_THRESHOLD is met (see CLAUDE.md for threshold definition) → stop loop, document final state.
 
 #### Phase C: Implement Fixes (if not stopping)
 
@@ -171,7 +164,6 @@ When loop ends (positive assessment or max rounds):
    - List remaining blockers
    - Estimate effort needed for each
    - Suggest whether to continue manually or pivot
-5. **Feishu notification** (if configured): Send `pipeline_done` with final score progression table
 
 ## Key Rules
 
@@ -189,6 +181,7 @@ When loop ends (positive assessment or max rounds):
 ```
 mcp__codex__codex-reply:
   threadId: [saved from round 1]
+  model: REVIEWER_MODEL
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
     [Round N update]

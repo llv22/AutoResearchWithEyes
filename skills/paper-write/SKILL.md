@@ -11,10 +11,7 @@ Draft a LaTeX paper based on: **$ARGUMENTS**
 
 ## Constants
 
-- **REVIEWER_MODEL = `gpt-5.4`** — Model used via Codex MCP for section review. Must be an OpenAI model.
-- **TARGET_VENUE = `ICLR`** — Default venue. Supported: `ICLR`, `NeurIPS`, `ICML`. Determines style file and formatting.
-- **ANONYMOUS = true** — If true, use anonymous author block. Set `false` for camera-ready.
-- **MAX_PAGES = 9** — Main body page limit. Counts from first page to end of Conclusion section. References and appendix are NOT counted.
+All constants (REVIEWER_MODEL, VENUE, TEMPLATE_DIR) are defined in the project's **CLAUDE.md**. Read them from there before proceeding. Page limits are venue-dependent — see CLAUDE.md.
 
 ## Inputs
 
@@ -30,27 +27,7 @@ If no PAPER_PLAN.md exists, ask the user to run `/paper-plan` first or provide a
 
 ### Venue-Specific Setup
 
-The skill includes conference templates in `templates/`. Select based on TARGET_VENUE:
-
-**ICLR:**
-```latex
-\documentclass{article}
-\usepackage{iclr2026_conference,times}
-% \iclrfinalcopy  % Uncomment for camera-ready
-```
-
-**NeurIPS:**
-```latex
-\documentclass{article}
-\usepackage[preprint]{neurips_2025}
-% \usepackage[final]{neurips_2025}  % Camera-ready
-```
-
-**ICML:**
-```latex
-\documentclass[accepted]{icml2025}
-% Use [accepted] for camera-ready
-```
+Copy venue template files from `TEMPLATE_DIR/VENUE/` (resolved per CLAUDE.md). The template directory should contain the venue's `.sty`, `.cls`, and `.bst` files.
 
 ### Project Structure
 
@@ -222,11 +199,11 @@ After drafting all sections, scan for common AI writing patterns and fix them:
 
 ### Step 6: Cross-Review with REVIEWER_MODEL
 
-Send the complete draft to GPT-5.4 xhigh:
+Send the complete draft to REVIEWER_MODEL xhigh:
 
 ```
 mcp__codex__codex:
-  model: gpt-5.4
+  model: REVIEWER_MODEL
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
     Review this [VENUE] paper draft (main body, excluding appendix).

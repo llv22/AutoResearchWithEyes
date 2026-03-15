@@ -49,12 +49,6 @@ Present results in a comparison table:
 - Flag unexpected results (negative delta, NaN, divergence)
 - Suggest next steps based on findings
 
-### Step 6: Feishu Notification (if configured)
-
-After results are collected, check `~/.claude/feishu.json`:
-- Send `experiment_done` notification: results summary table, delta vs baseline
-- If config absent or mode `"off"`: skip entirely (no-op)
-
 ## Key Rules
 - Always show raw numbers before interpretation
 - Compare against the correct baseline (same config)

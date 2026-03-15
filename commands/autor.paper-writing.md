@@ -1,6 +1,6 @@
 ---
-name: paper-writing
-description: "Workflow 3: Full paper writing pipeline. Orchestrates paper-plan → paper-figure → paper-write → paper-compile → auto-paper-improvement-loop to go from a narrative report to a polished, submission-ready PDF. Use when user says \"写论文全流程\", \"write paper pipeline\", \"从报告到PDF\", \"paper writing\", or wants the complete paper generation workflow."
+name: autor.paper-writing
+description: "Workflow 3: Full paper writing pipeline. Orchestrates paper-plan → paper-figure → paper-write → paper-compile → paper-improver to go from a narrative report to a polished, submission-ready PDF. Use when user says \"write paper pipeline\", \"paper writing\", or wants the complete paper generation workflow."
 argument-hint: [narrative-report-path-or-topic]
 allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Agent, Skill, mcp__codex__codex, mcp__codex__codex-reply
 ---
@@ -14,7 +14,7 @@ Orchestrate a complete paper writing workflow for: **$ARGUMENTS**
 This skill chains five sub-skills into a single automated pipeline:
 
 ```
-/paper-plan → /paper-figure → /paper-write → /paper-compile → /auto-paper-improvement-loop
+/paper-plan → /paper-figure → /paper-write → /paper-compile → paper-improver agent
   (outline)     (plots)        (LaTeX)        (build PDF)       (review & polish ×2)
 ```
 
@@ -22,12 +22,11 @@ Each phase builds on the previous one's output. The final deliverable is a polis
 
 ## Constants
 
-- **VENUE = `ICLR`** — Target venue. Options: `ICLR`, `NeurIPS`, `ICML`. Affects style file, page limit, citation format.
-- **MAX_IMPROVEMENT_ROUNDS = 2** — Number of review→fix→recompile rounds in the improvement loop.
-- **REVIEWER_MODEL = `gpt-5.4`** — Model used via Codex MCP for plan review, figure review, writing review, and improvement loop.
-- **AUTO_PROCEED = true** — Auto-continue between phases. Set `false` to pause and wait for user approval after each phase.
+All constants (MAX_IMPROVEMENT_ROUNDS, REVIEWER_MODEL, AUTO_PROCEED) are defined in the project's **CLAUDE.md**. Read them from there before proceeding.
 
-> Override inline: `/paper-writing "NARRATIVE_REPORT.md" — venue: NeurIPS, wait for my approval at each step`
+- **VENUE** — User-provided at runtime. No default — ask the user if not specified.
+
+> Override inline: `/autor.paper-writing "NARRATIVE_REPORT.md" — venue: NeurIPS, wait for my approval at each step`
 
 ## Inputs
 
@@ -55,14 +54,14 @@ Invoke `/paper-plan` to create the structural outline:
 - Design section structure (5-8 sections depending on paper type)
 - Plan figure/table placement with data sources
 - Scaffold citation structure
-- GPT-5.4 reviews the plan for completeness
+- REVIEWER_MODEL reviews the plan for completeness
 
 **Output:** `PAPER_PLAN.md` with section plan, figure plan, citation scaffolding.
 
 **Checkpoint:** Present the plan summary to the user.
 
 ```
-📐 Paper plan complete:
+Paper plan complete:
 - Title: [proposed title]
 - Sections: [N] ([list])
 - Figures: [N] auto-generated + [M] manual
@@ -87,7 +86,7 @@ Invoke `/paper-figure` to generate data-driven plots and tables:
 - Generate matplotlib/seaborn plots from JSON/CSV data
 - Generate LaTeX comparison tables
 - Create `figures/latex_includes.tex` for easy insertion
-- GPT-5.4 reviews figure quality and captions
+- REVIEWER_MODEL reviews figure quality and captions
 
 **Output:** `figures/` directory with PDFs, generation scripts, and LaTeX snippets.
 
@@ -96,7 +95,7 @@ Invoke `/paper-figure` to generate data-driven plots and tables:
 **Checkpoint:** List generated vs manual figures.
 
 ```
-📊 Figures complete:
+Figures complete:
 - Auto-generated: [list]
 - Manual (need your input): [list]
 - LaTeX snippets: figures/latex_includes.tex
@@ -120,14 +119,14 @@ Invoke `/paper-write` to generate section-by-section LaTeX:
 - Clean stale files from previous section structures
 - Automated bib cleaning (remove uncited entries)
 - De-AI polish (remove "delve", "pivotal", "landscape"...)
-- GPT-5.4 reviews each section for quality
+- REVIEWER_MODEL reviews each section for quality
 
 **Output:** `paper/` directory with `main.tex`, `sections/*.tex`, `references.bib`, `math_commands.tex`.
 
 **Checkpoint:** Report section completion.
 
 ```
-✍️ LaTeX writing complete:
+LaTeX writing complete:
 - Sections: [N] written ([list])
 - Citations: [N] unique keys in references.bib
 - Stale files cleaned: [list, if any]
@@ -144,9 +143,9 @@ Invoke `/paper-compile` to build the PDF:
 ```
 
 **What this does:**
-- `latexmk -pdf` with automatic multi-pass compilation
+- COMPILER with ENGINE (from CLAUDE.md) for automatic multi-pass compilation
 - Auto-fix common errors (missing packages, undefined refs, BibTeX syntax)
-- Up to 3 compilation attempts
+- Up to MAX_COMPILE_ATTEMPTS compilation attempts
 - Post-compilation checks: undefined refs, page count, font embedding
 - Precise page verification via `pdftotext`
 - Stale file detection
@@ -156,7 +155,7 @@ Invoke `/paper-compile` to build the PDF:
 **Checkpoint:** Report compilation results.
 
 ```
-🔨 Compilation complete:
+Compilation complete:
 - Status: SUCCESS
 - Pages: [X] (main body) + [Y] (references) + [Z] (appendix)
 - Within page limit: YES/NO
@@ -168,17 +167,17 @@ Shall I proceed with the improvement loop?
 
 ### Phase 5: Auto Improvement Loop
 
-Invoke `/auto-paper-improvement-loop` to polish the paper:
+Invoke the `paper-improver` agent to polish the paper:
 
 ```
-/auto-paper-improvement-loop "paper/"
+Use the paper-improver agent for: "paper/"
 ```
 
-**What this does (2 rounds):**
+**What this does (MAX_IMPROVEMENT_ROUNDS rounds):**
 
-**Round 1:** GPT-5.4 xhigh reviews the full paper → identifies CRITICAL/MAJOR/MINOR issues → Claude Code implements fixes → recompile → save `main_round1.pdf`
+**Round 1:** REVIEWER_MODEL xhigh reviews the full paper → identifies CRITICAL/MAJOR/MINOR issues → Claude Code implements fixes → recompile → save `main_round1.pdf`
 
-**Round 2:** GPT-5.4 xhigh re-reviews with conversation context → identifies remaining issues → Claude Code implements fixes → recompile → save `main_round2.pdf`
+**Round 2:** REVIEWER_MODEL xhigh re-reviews with conversation context → identifies remaining issues → Claude Code implements fixes → recompile → save `main_round2.pdf`
 
 **Typical improvements:**
 - Fix assumption-model mismatches
@@ -204,11 +203,11 @@ Invoke `/auto-paper-improvement-loop` to polish the paper:
 
 | Phase | Status | Output |
 |-------|--------|--------|
-| 1. Paper Plan | ✅ | PAPER_PLAN.md |
-| 2. Figures | ✅ | figures/ ([N] auto + [M] manual) |
-| 3. LaTeX Writing | ✅ | paper/sections/*.tex ([N] sections, [M] citations) |
-| 4. Compilation | ✅ | paper/main.pdf ([X] pages) |
-| 5. Improvement | ✅ | [score0]/10 → [score2]/10 |
+| 1. Paper Plan | Done | PAPER_PLAN.md |
+| 2. Figures | Done | figures/ ([N] auto + [M] manual) |
+| 3. LaTeX Writing | Done | paper/sections/*.tex ([N] sections, [M] citations) |
+| 4. Compilation | Done | paper/main.pdf ([X] pages) |
+| 5. Improvement | Done | [score0]/10 → [score2]/10 |
 
 ## Improvement Scores
 | Round | Score | Key Changes |
@@ -246,15 +245,15 @@ Invoke `/auto-paper-improvement-loop` to polish the paper:
 ## Composing with Other Workflows
 
 ```
-/idea-discovery "direction"         ← Workflow 1: find ideas
+/autor.idea-discovery "direction"         ← Workflow 1: find ideas
 implement                           ← write code
 /run-experiment                     ← deploy experiments
-/auto-review-loop "paper topic"     ← Workflow 2: iterate research
-/paper-writing "NARRATIVE_REPORT.md"  ← Workflow 3: you are here
-                                         submit! 🎉
+/autor.auto-review-loop "paper topic"     ← Workflow 2: iterate research
+/autor.paper-writing "NARRATIVE_REPORT.md"  ← Workflow 3: you are here
+                                         submit!
 
-Or use /research-pipeline for the Workflow 1+2 end-to-end flow,
-then /paper-writing for the final writing step.
+Or use /autor.research-pipeline for the Workflow 1+2 end-to-end flow,
+then /autor.paper-writing for the final writing step.
 ```
 
 ## Typical Timeline
@@ -263,8 +262,8 @@ then /paper-writing for the final writing step.
 |-------|----------|------------|
 | 1. Paper Plan | 5-10 min | No |
 | 2. Figures | 5-15 min | No |
-| 3. LaTeX Writing | 15-30 min | Yes ✅ |
+| 3. LaTeX Writing | 15-30 min | Yes |
 | 4. Compilation | 2-5 min | No |
-| 5. Improvement | 15-30 min | Yes ✅ |
+| 5. Improvement | 15-30 min | Yes |
 
 **Total: ~45-90 min** for a full paper from narrative report to polished PDF.

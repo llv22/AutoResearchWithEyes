@@ -79,12 +79,6 @@ ssh <server> "screen -ls"
 **Local:**
 Check process is running and GPU is allocated.
 
-### Step 6: Feishu Notification (if configured)
-
-After deployment is verified, check `~/.claude/feishu.json`:
-- Send `experiment_done` notification: which experiments launched, which GPUs, estimated time
-- If config absent or mode `"off"`: skip entirely (no-op)
-
 ## Key Rules
 
 - ALWAYS check GPU availability first — never blindly assign GPUs
