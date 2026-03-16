@@ -16,6 +16,3 @@ __pycache__/
 
 # Environment
 .env
-
-# Click-Through
-click-through/[0-9]*_*.md
