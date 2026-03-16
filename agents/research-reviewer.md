@@ -60,7 +60,7 @@ Stop iterating when:
 - The narrative structure is settled
 
 ### Step 5: Document Everything
-Save the full interaction and conclusions to a review document in the project root:
+Save the full interaction and conclusions to a review document. When invoked from a workflow command (e.g., `/autor.idea-discovery`), save to `OUTPUT_DIR/REVIEW_[topic]_[date].md`. When invoked standalone, save to the project root. Include:
 - Round-by-round summary of criticisms and responses
 - Final consensus on claims, narrative, and experiments
 - Claims matrix (what claims are allowed under each possible outcome)

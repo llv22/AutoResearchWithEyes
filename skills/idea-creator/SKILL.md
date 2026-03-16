@@ -152,7 +152,7 @@ Note: Skip this phase if the ideas are purely theoretical or if no GPU is availa
 
 ### Phase 6: Output — Ranked Idea Report
 
-Write a structured report to `IDEA_REPORT.md` in the project root:
+Write a structured report to `IDEA_REPORT.md`. When invoked from a workflow command (e.g., `/autor.idea-discovery`), save to `OUTPUT_DIR/IDEA_REPORT.md`. When invoked standalone, save to the project root:
 
 ```markdown
 # Research Idea Report

@@ -24,12 +24,44 @@ codex auth login
 
 # 3. Launch Claude Code — skills and commands are auto-discovered
 claude
-> /autor.idea-discovery "your research direction"      # Command: literature → brainstorm → validate
-> /autor.idea-discovery tests/0_idea_discovery.md      # Or pass a spec file (auto-reads content)
-> /autor.auto-review-loop                              # Command: review → fix → re-review overnight
-> /autor.paper-writing "NARRATIVE_REPORT.md"           # Command: narrative → polished PDF
-> /autor.research-pipeline "your research direction"   # Command: full end-to-end pipeline
 ```
+
+```
+# Run any workflow command:
+> /autor.idea-discovery "your research direction"      # Plain text → ./autor.idea_discovery/
+> /autor.idea-discovery path/to/autor.idea_discovery/task_spec.md    # Spec file  → path/to/autor.idea_discovery/
+> /autor.auto-review-loop                              # Review → fix → re-review overnight
+> /autor.paper-writing "NARRATIVE_REPORT.md"           # Narrative → polished PDF
+> /autor.research-pipeline "your research direction"   # Full end-to-end pipeline
+```
+
+Each command produces a **self-contained output folder** — the input spec, intermediate results, final reports, and live status tracking are all organized in one place:
+
+```
+path/to/
+└── autor.idea_discovery/                  # Self-contained output folder
+    ├── task_spec.md                       # Copy of input (portability & reproducibility)
+    ├── task_status.md                     # Live status, decisions, linked idea rankings
+    ├── LITERATURE_SURVEY.md               # Phase 1: landscape summary with paper table
+    ├── IDEA_REPORT.md                     # Phase 5: ranked ideas + experiment plan
+    └── REVIEW_<topic>_<date>.md           # Phase 4: external reviewer feedback
+```
+
+`task_status.md` is updated after each phase — it tracks pipeline progress, key decisions, and includes a ranked idea table where each idea links to its full description in `IDEA_REPORT.md`.
+
+See [click-through/case-0/](click-through/case-0/) for a complete worked example.
+
+### Output Folder Conventions
+
+All workflow commands follow the same self-contained output pattern: the output folder includes `task_spec.md` (input), `task_status.md` (live status with linked rankings), and all generated results — making it **portable, shareable, and reproducible**.
+
+| Command | Input | Output Folder |
+|---------|-------|---------------|
+| `/autor.idea-discovery path/to/spec.md` | `spec.md` | `path/to/autor.idea_discovery/` |
+| `/autor.idea-discovery "plain text"` | (inline) | `./autor.idea_discovery/` |
+| `/autor.idea-discovery spec.md — output: custom/` | `spec.md` | `custom/` |
+
+> Override the output folder with `— output: path/to/output/` appended to any command.
 
 See [Setup](#%EF%B8%8F-setup) for full details.
 
@@ -143,7 +175,12 @@ Give a research direction (plain text or a path to a spec file) — the command 
 │                                    │(agent)   │            │
 │                                    └──────────┘            │
 │                                                              │
-│   Output: IDEA_REPORT.md with ranked ideas + pilot results   │
+│   Output: OUTPUT_DIR/ (self-contained)                       │
+│     ├── task_spec.md              (input copy)               │
+│     ├── task_status.md            (live status + links)      │
+│     ├── LITERATURE_SURVEY.md      (landscape)                │
+│     ├── IDEA_REPORT.md            (ranked ideas)             │
+│     └── REVIEW_<topic>_<date>.md  (reviewer feedback)        │
 └─────────────────────────────────────────────────────────────┘
 ```
 

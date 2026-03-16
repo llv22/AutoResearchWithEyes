@@ -132,8 +132,12 @@ Plus a narrative summary of the landscape (3-5 paragraphs).
 
 If BibTeX entries were extracted from arXiv TeX sources, include a `references.bib` snippet for direct use in paper writing.
 
-### Step 5: Save (if requested)
-- Save paper PDFs to `literature/` or `papers/`
+### Step 5: Save
+
+When invoked from a workflow command (e.g., `/autor.idea-discovery`), save the literature summary to `OUTPUT_DIR/LITERATURE_SURVEY.md`. When invoked standalone, present results inline.
+
+Additionally:
+- Save paper PDFs to `literature/` or `papers/` (if requested)
 - Cache arXiv TeX sources to `~/.cache/aris/arxiv/` for future reuse
 - Update related work notes in project memory
 
