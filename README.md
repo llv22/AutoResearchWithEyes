@@ -348,6 +348,12 @@ git clone https://github.com/llv23/AutoResearchWithEyes.git
 cd AutoResearchWithEyes
 ```
 
+| Method                              | Persistent     | In-place (no cache copy) | Works in VSCode extension |
+| ----------------------------------- | -------------- | ------------------------ | ------------------------- |
+| `--plugin-dir`                      | ❌ session only | ✅                        | ❌                      |
+| Shell alias wrapping `--plugin-dir` | ✅ (via shell)  | ✅                        | ❌                      |
+| Marketplace install                 | ✅              | ❌ (cached)               | ✅                      |
+
 **Option A: Use from project directory** (recommended)
 
 Simply run `claude` from the repo. Claude Code auto-discovers skills from `skills/`, commands from `commands/`, and agents from `agents/`:
@@ -375,6 +381,96 @@ cp -r commands/* ~/.claude/commands/
 ```
 
 The Codex MCP server auto-configures from `.mcp.json` (project-level) when running from the project directory. You can also add it at user scope (`claude mcp add codex -s user -- codex mcp-server`) to make it available in all projects — both can coexist.
+
+**Option D: Symbolic Installation**
+
+Install as a Claude Code plugin via a local marketplace symlink, so skills and commands are available from any directory without `--plugin-dir`. Changes to the source repo are picked up automatically — no reinstall needed.
+
+```bash
+# 1. Create the marketplace directory structure
+mkdir -p ~/.claude/plugins/marketplaces/autor-marketplace/.claude-plugin
+
+# 2. Symlink the plugin into the marketplace
+ln -s /path/to/AutoResearchWithEyes \
+  ~/.claude/plugins/marketplaces/autor-marketplace/auto-research-with-eyes
+
+# 3. Create the marketplace manifest
+cat > ~/.claude/plugins/marketplaces/autor-marketplace/.claude-plugin/marketplace.json << 'EOF'
+{
+  "name": "autor-marketplace",
+  "owner": {
+    "name": "your-username"
+  },
+  "plugins": [
+    {
+      "name": "auto-research-with-eyes",
+      "description": "Autonomous ML research pipeline: idea discovery, experiment, review, paper writing",
+      "source": "./auto-research-with-eyes",
+      "category": "research"
+    }
+  ]
+}
+EOF
+```
+
+> **Note:** The plugin source must contain `.claude-plugin/plugin.json` (already included in this repo).
+
+```bash
+# 4. Register the marketplace in known_marketplaces.json
+#    Add (or merge) this entry into ~/.claude/plugins/known_marketplaces.json:
+python3 -c "
+import json, os, pathlib
+path = pathlib.Path(os.path.expanduser('~/.claude/plugins/known_marketplaces.json'))
+data = json.loads(path.read_text()) if path.exists() else {}
+data['autor-marketplace'] = {
+    'source': {'source': 'directory', 'path': os.path.expanduser('~/.claude/plugins/marketplaces/autor-marketplace')},
+    'installLocation': os.path.expanduser('~/.claude/plugins/marketplaces/autor-marketplace'),
+    'lastUpdated': '$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'
+}
+path.write_text(json.dumps(data, indent=2) + '\n')
+print('✓ Registered autor-marketplace')
+"
+
+# 5. Enable the plugin in settings.json
+#    Add this to the "enabledPlugins" object in ~/.claude/settings.json:
+python3 -c "
+import json, os, pathlib
+path = pathlib.Path(os.path.expanduser('~/.claude/settings.json'))
+data = json.loads(path.read_text()) if path.exists() else {}
+data.setdefault('enabledPlugins', {})['auto-research-with-eyes@autor-marketplace'] = True
+path.write_text(json.dumps(data, indent=2) + '\n')
+print('✓ Enabled auto-research-with-eyes@autor-marketplace')
+"
+
+# 6. Verify — restart Claude Code and check the plugin loads
+claude
+# Then run: /autor.idea-discovery --help
+```
+
+<details>
+<summary><b>What gets created (reference)</b></summary>
+
+```
+~/.claude/plugins/
+├── known_marketplaces.json          # ← entry added in step 4
+└── marketplaces/
+    └── autor-marketplace/
+        ├── .claude-plugin/
+        │   └── marketplace.json     # ← created in step 3
+        └── auto-research-with-eyes  # ← symlink to your clone (step 2)
+            ├── .claude-plugin/
+            │   └── plugin.json      # (in the repo)
+            ├── skills/
+            ├── commands/
+            ├── agents/
+            └── ...
+
+~/.claude/settings.json              # ← enabledPlugins entry added in step 5
+```
+
+</details>
+
+> **Tip:** Since the marketplace entry is a symlink, `git pull` in the source repo automatically updates the plugin — no reinstall needed. To uninstall, remove the symlink and the corresponding entries from `known_marketplaces.json` and `settings.json`.
 
 ### Download Venue Templates
 
