@@ -2,9 +2,23 @@
 
 All skills, commands, and agents in this plugin reference these shared constants. Override per-invocation by passing inline arguments (e.g., `— pilot budget: 4h`).
 
-## External Reviewer
+## Models (cross-model, no self-play)
 
-- **REVIEWER_MODEL = `gpt-5.4`** — Model used via Codex MCP for brainstorming, review, and cross-verification.
+Two roles, two **different families** — Claude executes, GPT reviews. This adversarial split is
+the framework's core principle; do not collapse both roles onto one family.
+
+- **EXECUTOR_MODEL = `claude-fable-5`** (Fable 5) — the Claude Code model that *drives* the
+  pipeline: idea filtering/synthesis, literature review, novelty judgment, and writing. Use it
+  for more solid `idea-discovery` output. Run the `/autor.*` commands under this model (`/model
+  fable` in Claude Code, or spawn via an `Agent` with model `fable`). (Verified available as
+  `claude-fable-5` on 2026-07-14.)
+- **REVIEWER_MODEL = `gpt-5.6-sol`** — external critical reviewer + divergent brainstorm via
+  Codex MCP. Always run at `model_reasoning_effort: xhigh`. (Verified via `codex exec -m
+  gpt-5.6-sol` on 2026-07-14; upgraded from `gpt-5.5`.)
+
+> Note: raw idea *generation* and *review* go to REVIEWER_MODEL (Codex/GPT); the EXECUTOR
+> (Claude/Fable 5) orchestrates, filters, and writes. Keeping them in separate families is what
+> makes the review adversarial rather than self-review.
 
 ## Idea Discovery & Pilot Experiments
 

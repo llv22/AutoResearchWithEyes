@@ -6,7 +6,7 @@
 
 A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin for autonomous ML research workflows. Orchestrates **cross-model collaboration** — Claude Code drives the research while an external LLM (via [Codex MCP](https://github.com/openai/codex)) acts as a critical reviewer. Also supports [alternative model combinations](#-alternative-model-combinations) (e.g., GLM + GPT, GLM + MiniMax) — no Claude API required.
 
-> **Why cross-model?** A single model reviewing its own output creates blind spots. Two complementary models — Claude Code for fast execution, GPT-5.4 xhigh for rigorous critique — produce better outcomes than either alone. Going from 1 to 2 models is the biggest gain; adding more gives diminishing returns.
+> **Why cross-model?** A single model reviewing its own output creates blind spots. Two complementary models — Claude Code (Fable 5) for solid execution, GPT-5.6 Sol xhigh for rigorous critique — produce better outcomes than either alone. Going from 1 to 2 models is the biggest gain; adding more gives diminishing returns.
 
 ---
 
@@ -70,11 +70,11 @@ See [Setup](#%EF%B8%8F-setup) for full details.
 - **10 composable skills** — atomic building blocks: literature search, idea generation, novelty check, experiments, paper writing
 - **4 workflow commands** — orchestrate skills + agents into end-to-end pipelines (`/autor.idea-discovery`, `/autor.auto-review-loop`, `/autor.paper-writing`, `/autor.research-pipeline`)
 - **2 specialized agents** — `research-reviewer` (senior ML reviewer via Codex MCP) and `paper-improver` (2-round auto-improvement)
-- **Cross-model collaboration** — Claude Code executes, GPT-5.4 xhigh reviews. Adversarial, not self-play
+- **Cross-model collaboration** — Claude Code (Fable 5) executes, GPT-5.6 Sol xhigh reviews. Adversarial, not self-play
 - **Centralized configuration** — all constants in `CLAUDE.md`, override per-invocation with inline arguments
 - **Venue templates** — bundled template directories with fallback resolution: `TEMPLATE_DIR/VENUE/` → bundled → error with instructions
 - **GPU deployment** — auto rsync, screen sessions, multi-GPU parallel experiments, live monitoring
-- **Flexible models** — default Claude x GPT-5.4, also supports [GLM + GPT, GLM + MiniMax](#-alternative-model-combinations)
+- **Flexible models** — default Claude x GPT-5.6 Sol, also supports [GLM + GPT, GLM + MiniMax](#-alternative-model-combinations)
 
 ---
 
@@ -103,7 +103,7 @@ AutoResearchWithEyes/
 │   ├── paper-writing.md         # plan → figures → write → compile → improver
 │   └── research-pipeline.md     # meta-pipeline: idea → implement → review
 ├── agents/                      # 2 specialized personas
-│   ├── research-reviewer.md     # Senior ML reviewer via Codex MCP (GPT-5.4 xhigh)
+│   ├── research-reviewer.md     # Senior ML reviewer via Codex MCP (GPT-5.6 Sol xhigh)
 │   └── paper-improver.md        # 2-round auto-improvement loop
 └── templates/                   # Venue-specific LaTeX style files
     ├── iclr2026/
@@ -147,7 +147,7 @@ These commands compose skills + agents into a full research lifecycle. Use indep
 Give a research direction (plain text or a path to a spec file) — the command handles the rest:
 
 1. **Survey** the landscape via `research-lit` (arXiv TeX sources, local PDFs, web search)
-2. **Brainstorm** 8-12 concrete ideas via `idea-creator` (GPT-5.4 xhigh)
+2. **Brainstorm** 8-12 concrete ideas via `idea-creator` (GPT-5.6 Sol xhigh)
 3. **Filter** by feasibility, compute cost, and quick novelty search
 4. **Validate** top ideas with `novelty-check` + `research-reviewer` agent
 5. **Pilot** top 2-3 ideas in parallel on GPUs (30 min - 2 hr each)
@@ -260,7 +260,7 @@ Give a research direction (plain text or a path to a spec file) — the command 
 - **Auto figure generation** — line plots, bar charts, comparison tables from JSON data
 - **Clean bib** — automated filtering removes uncited entries
 - **Template resolution** — automatically loads venue style files from `templates/VENUE/`
-- **GPT-5.4 review** — `paper-improver` agent runs 2 rounds of content review + format check
+- **GPT-5.6 Sol review** — `paper-improver` agent runs 2 rounds of content review + format check
 - **De-AI polish** — removes AI writing patterns (delve, pivotal, landscape...)
 - **Page verification** — `pdftotext`-based precise check against venue page limit
 
@@ -268,7 +268,7 @@ Give a research direction (plain text or a path to a spec file) — the command 
 
 #### Paper Improvement (via `paper-improver` agent)
 
-After `/autor.paper-writing` generates the paper, the `paper-improver` agent runs 2 rounds of GPT-5.4 xhigh content review + fix + recompile, plus a final format compliance check.
+After `/autor.paper-writing` generates the paper, the `paper-improver` agent runs 2 rounds of GPT-5.6 Sol xhigh content review + fix + recompile, plus a final format compliance check.
 
 ### Command 4: Research Pipeline (`/autor.research-pipeline`)
 
@@ -308,8 +308,8 @@ The mandatory human gate ensures you review and approve the selected idea before
 
 | Agent | Description | Model |
 |-------|-------------|-------|
-| [`research-reviewer`](agents/research-reviewer.md) | Senior ML reviewer — multi-round critical feedback on ideas, papers, results | GPT-5.4 xhigh via Codex MCP |
-| [`paper-improver`](agents/paper-improver.md) | 2-round auto-improvement: review → fix → recompile. State via PAPER_IMPROVEMENT_STATE.json | GPT-5.4 xhigh via Codex MCP |
+| [`research-reviewer`](agents/research-reviewer.md) | Senior ML reviewer — multi-round critical feedback on ideas, papers, results | GPT-5.6 Sol xhigh via Codex MCP |
+| [`paper-improver`](agents/paper-improver.md) | 2-round auto-improvement: review → fix → recompile. State via PAPER_IMPROVEMENT_STATE.json | GPT-5.6 Sol xhigh via Codex MCP |
 
 ---
 
@@ -529,7 +529,7 @@ To run without permission prompts, add to `.claude/settings.local.json`:
 <details>
 <summary><h3>GPU Server Setup (For Auto-Experiments)</h3></summary>
 
-When GPT-5.4 says "run an ablation study", Claude Code writes the script and deploys it to your GPU server. Add your server info to your project's `CLAUDE.md`:
+When GPT-5.6 Sol says "run an ablation study", Claude Code writes the script and deploys it to your GPU server. Add your server info to your project's `CLAUDE.md`:
 
 ```markdown
 ## Remote Server
@@ -584,8 +584,8 @@ Don't have Claude / OpenAI API? Swap in other models — same cross-model archit
 
 | Role | Default | Alt A: GLM + GPT | Alt B: GLM + MiniMax |
 |------|---------|-------------------|----------------------|
-| Executor (Claude Code) | Claude Opus/Sonnet | GLM-5 (ZhiPu API) | GLM-5 (ZhiPu API) |
-| Reviewer (Codex MCP) | GPT-5.4 | GPT-5.4 (OpenAI API) | MiniMax-M2.5 (MiniMax API) |
+| Executor (Claude Code) | Claude Fable 5 | GLM-5 (ZhiPu API) | GLM-5 (ZhiPu API) |
+| Reviewer (Codex MCP) | GPT-5.6 Sol | GPT-5.6 Sol (OpenAI API) | MiniMax-M2.5 (MiniMax API) |
 | Need OpenAI API? | Yes | Yes | **No** |
 
 <details>
