@@ -48,12 +48,16 @@ Map the research area to understand what exists and where the gaps are.
 
 ### Phase 2: Idea Generation (brainstorm with external LLM)
 
-Use the external LLM via Codex MCP for divergent thinking:
+Use the external LLM via Codex MCP for divergent thinking. Enable **web search**
+(`tools.web_search`) so brainstorming is grounded in current literature — this is light
+search-augmented reasoning, **not** a dedicated deep-research pass (that is gpt-pro's job).
+Web search is set on this initial call, so the thread inherits it for the later
+`codex-reply` critical-review step.
 
 ```
 mcp__codex__codex:
   model: REVIEWER_MODEL
-  config: {"model_reasoning_effort": "xhigh"}
+  config: {"model_reasoning_effort": "xhigh", "tools": {"web_search": true}}
   prompt: |
     You are a senior ML researcher brainstorming research ideas.
 

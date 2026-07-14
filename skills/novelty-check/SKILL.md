@@ -41,9 +41,11 @@ For EACH core claim, search using ALL available sources:
 3. **Read abstracts**: For each potentially overlapping paper, WebFetch its abstract and related work section
 
 ### Phase C: Cross-Model Verification
-Call REVIEWER_MODEL via Codex MCP (`mcp__codex__codex`) with xhigh reasoning:
+Call REVIEWER_MODEL via Codex MCP (`mcp__codex__codex`) with xhigh reasoning **and web search
+enabled** — novelty verdicts must be able to check the live literature, not just training
+priors (still light search, not a deep-research pass):
 ```
-config: {"model_reasoning_effort": "xhigh"}
+config: {"model_reasoning_effort": "xhigh", "tools": {"web_search": true}}
 ```
 Prompt should include:
 - The proposed method description
