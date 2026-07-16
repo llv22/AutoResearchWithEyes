@@ -1,0 +1,11 @@
+{
+  "name": "auto-research-with-eyes",
+  "owner": { "name": "llv23", "url": "https://github.com/llv22" },
+  "plugins": [
+    {
+      "name": "auto-research-with-eyes",
+      "source": "./",
+      "description": "Autonomous ML research pipeline: idea discovery → experiment → review → paper writing (cross-model: Claude executes, GPT reviews via Codex MCP)."
+    }
+  ]
+}
