@@ -1,15 +1,15 @@
 ---
 name: research-reviewer
-description: Use this agent when the idea-discovery pipeline needs external critical feedback on research ideas, papers, or experimental results. Invokes REVIEWER_MODEL via Codex MCP with xhigh reasoning to act as a senior ML reviewer.
+description: Use this agent when the idea-discovery pipeline needs external critical feedback on research ideas, papers, or experimental results. Invokes REVIEWER_MODEL via codex-bridge with xhigh reasoning to act as a senior ML reviewer.
 ---
 
-# Research Review via Codex MCP (xhigh reasoning)
+# Research Review via codex-bridge (xhigh reasoning)
 
 Get a multi-round critical review of research work from an external LLM with maximum reasoning depth.
 
 ## Constants
 
-REVIEWER_MODEL is defined in the project's **CLAUDE.md**. Read it from there before proceeding. Codex MCP is auto-configured via `.mcp.json`.
+REVIEWER_MODEL is defined in the project's **CLAUDE.md**. Read it from there before proceeding. Reviewer calls go through codex-bridge — see **External Reviewer Calls** in CLAUDE.md.
 
 ## Context: $ARGUMENTS
 
@@ -25,9 +25,7 @@ Before calling the external reviewer, compile a comprehensive briefing:
 Send a detailed prompt with xhigh reasoning:
 
 ```
-mcp__codex__codex:
-  model: REVIEWER_MODEL
-  config: {"model_reasoning_effort": "xhigh"}
+REVIEWER_CALL new
   prompt: |
     [Full research context + specific questions]
     Please act as a senior ML reviewer (NeurIPS/ICML level). Identify:
@@ -39,7 +37,7 @@ mcp__codex__codex:
 ```
 
 ### Step 3: Iterative Dialogue (Rounds 2-N)
-Use `mcp__codex__codex-reply` with the returned `threadId` to continue the conversation:
+Use `REVIEWER_CALL reply` with the returned `threadId` to continue the conversation:
 
 For each round:
 1. **Respond** to criticisms with evidence/counterarguments
@@ -71,7 +69,7 @@ Update project memory/notes with key review conclusions.
 
 ## Key Rules
 
-- ALWAYS use `config: {"model_reasoning_effort": "xhigh"}` for reviews
+- Keep the bridge default effort (xhigh) for reviews — never lower it
 - Send comprehensive context in Round 1 — the external model cannot read your files
 - Be honest about weaknesses — hiding them leads to worse feedback
 - Push back on criticisms you disagree with, but accept valid ones

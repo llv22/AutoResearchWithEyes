@@ -2,7 +2,7 @@
 name: autor.idea-discovery
 description: "Workflow 1: Full idea discovery pipeline. Orchestrates research-lit → idea-creator → novelty-check → research-reviewer to go from a broad research direction to validated, pilot-tested ideas. Use when user says \"idea discovery pipeline\" or wants the complete idea exploration workflow."
 argument-hint: [research-direction or path/to/spec.md]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Agent, Skill, mcp__codex__codex, mcp__codex__codex-reply
+allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Agent, Skill
 ---
 
 # Workflow 1: Idea Discovery Pipeline

@@ -2,7 +2,7 @@
 name: autor.research-pipeline
 description: "Full research pipeline: Workflow 1 (idea discovery) → implementation → Workflow 2 (auto review loop). Goes from a broad research direction to validated, reviewed research. Use when user says \"full pipeline\", \"end-to-end research\", or wants the complete autonomous research lifecycle. Does NOT include paper writing (Workflow 3) — invoke /autor.paper-writing separately after this completes."
 argument-hint: [research-direction]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Agent, Skill, mcp__codex__codex, mcp__codex__codex-reply
+allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Agent, Skill
 ---
 
 # Full Research Pipeline: Idea → Experiments → Reviewed Research

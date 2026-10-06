@@ -1,0 +1,9 @@
+# Managed by codex-bridge (copied into the bridge-owned CODEX_HOME on every call).
+#
+# Codex ships a built-in execpolicy (`default.rules`) that rejects some commands outright,
+# e.g. "rm -f style commands are not permitted". The approval gate (gate.py) is the single
+# authority for codex-bridge runs, so prefixes the gate already judges are released here.
+# Other built-in rejections are still logged to approvals.jsonl as `decided_by: codex_policy`;
+# add an override below only after reviewing them.
+
+prefix_rule(pattern = ["rm"], decision = "allow")
