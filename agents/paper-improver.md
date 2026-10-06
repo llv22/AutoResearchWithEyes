@@ -15,7 +15,7 @@ Unlike `/autor.auto-review-loop` (which iterates on **research** — running exp
 
 ## Constants
 
-All constants (MAX_IMPROVEMENT_ROUNDS, REVIEWER_MODEL) are defined in the project's **CLAUDE.md**. Read them from there before proceeding. Codex MCP is auto-configured via `.mcp.json`.
+All constants (MAX_IMPROVEMENT_ROUNDS, REVIEWER_MODEL) are defined in the project's **CLAUDE.md**. Read them from there before proceeding. Reviewer calls go through codex-bridge — see **External Reviewer Calls** in CLAUDE.md.
 
 - **REVIEW_LOG = `PAPER_IMPROVEMENT_LOG.md`** — Cumulative log of all rounds, stored in paper directory.
 
@@ -67,9 +67,7 @@ done > /tmp/paper_full_text.txt
 Send the full paper text to REVIEWER_MODEL xhigh:
 
 ```
-mcp__codex__codex:
-  model: REVIEWER_MODEL
-  config: {"model_reasoning_effort": "xhigh"}
+REVIEWER_CALL new
   prompt: |
     You are reviewing a [VENUE] paper. Please provide a detailed, structured review.
 
@@ -124,13 +122,10 @@ Verify: 0 undefined references, 0 undefined citations.
 
 ### Step 5: Round 2 Review
 
-Use `mcp__codex__codex-reply` with the saved threadId:
+Use `REVIEWER_CALL reply` with the saved threadId:
 
 ```
-mcp__codex__codex-reply:
-  threadId: [saved from Round 1]
-  model: REVIEWER_MODEL
-  config: {"model_reasoning_effort": "xhigh"}
+REVIEWER_CALL reply --thread [saved from Round 1]
   prompt: |
     [Round 2 update]
 
@@ -264,7 +259,7 @@ paper/
 
 - **Preserve all PDF versions** — user needs to compare progression
 - **Save FULL raw review text** — do not summarize or truncate REVIEWER_MODEL responses
-- **Use `mcp__codex__codex-reply`** for Round 2 to maintain conversation context
+- **Use `REVIEWER_CALL reply`** for Round 2 to maintain conversation context
 - **Always recompile after fixes** — verify 0 errors before proceeding
 - **Do not fabricate experimental results** — synthetic validation must describe methodology, not invent numbers
 - **Respect the paper's claims** — soften overclaims rather than adding unsupported new claims

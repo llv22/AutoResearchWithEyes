@@ -2,7 +2,7 @@
 name: idea-creator
 description: Generate and rank research ideas given a broad direction. Use when user says "找idea", "brainstorm ideas", "generate research ideas", "what can we work on", or wants to explore a research area for publishable directions.
 argument-hint: [research-direction]
-allowed-tools: Bash(*), Read, Write, Grep, Glob, WebSearch, WebFetch, Agent, mcp__codex__codex, mcp__codex__codex-reply
+allowed-tools: Bash(*), Read, Write, Grep, Glob, WebSearch, WebFetch, Agent
 ---
 
 # Research Idea Creator
@@ -48,16 +48,14 @@ Map the research area to understand what exists and where the gaps are.
 
 ### Phase 2: Idea Generation (brainstorm with external LLM)
 
-Use the external LLM via Codex MCP for divergent thinking. Enable **web search**
+Use the external LLM via codex-bridge for divergent thinking. Enable **web search**
 (`tools.web_search`) so brainstorming is grounded in current literature — this is light
 search-augmented reasoning, **not** a dedicated deep-research pass (that is gpt-pro's job).
-Web search is set on this initial call, so the thread inherits it for the later
-`codex-reply` critical-review step.
+Pass `--web` again on the later `REVIEWER_CALL reply` critical-review step — each call is a
+new Codex process, so search is enabled per call.
 
 ```
-mcp__codex__codex:
-  model: REVIEWER_MODEL
-  config: {"model_reasoning_effort": "xhigh", "tools": {"web_search": true}}
+REVIEWER_CALL new --web
   prompt: |
     You are a senior ML researcher brainstorming research ideas.
 
@@ -112,7 +110,7 @@ For each surviving idea, run a deeper evaluation:
 
 1. **Novelty check**: Use the `/novelty-check` workflow (multi-source search + REVIEWER_MODEL cross-verification) for each idea
 
-2. **Critical review**: Use REVIEWER_MODEL via `mcp__codex__codex-reply` (same thread):
+2. **Critical review**: Use REVIEWER_MODEL via `REVIEWER_CALL reply --web` (same thread):
    ```
    Here are our top ideas after filtering:
    [paste surviving ideas with novelty check results]

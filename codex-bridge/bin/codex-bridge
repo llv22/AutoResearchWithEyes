@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Entry point: run the codex_bridge package that sits next to this script.
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+exec env PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" python3 -m codex_bridge "$@"

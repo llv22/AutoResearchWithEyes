@@ -2,7 +2,7 @@
 name: paper-write
 description: "Draft LaTeX paper section by section from an outline. Use when user says \"写论文\", \"write paper\", \"draft LaTeX\", \"开始写\", or wants to generate LaTeX content from a paper plan."
 argument-hint: [venue-or-section]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Agent, WebSearch, WebFetch, mcp__codex__codex, mcp__codex__codex-reply
+allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Agent, WebSearch, WebFetch
 ---
 
 # Paper Write: Section-by-Section LaTeX Generation
@@ -202,9 +202,7 @@ After drafting all sections, scan for common AI writing patterns and fix them:
 Send the complete draft to REVIEWER_MODEL xhigh:
 
 ```
-mcp__codex__codex:
-  model: REVIEWER_MODEL
-  config: {"model_reasoning_effort": "xhigh"}
+REVIEWER_CALL new
   prompt: |
     Review this [VENUE] paper draft (main body, excluding appendix).
 

@@ -4,7 +4,7 @@
 
 [![Featured in awesome-agent-skills](https://img.shields.io/badge/Featured%20in-awesome--agent--skills-blue?style=flat&logo=github)](https://github.com/VoltAgent/awesome-agent-skills) · [Join Community](#-community)
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin for autonomous ML research workflows. Orchestrates **cross-model collaboration** — Claude Code drives the research while an external LLM (via [Codex MCP](https://github.com/openai/codex)) acts as a critical reviewer. Also supports [alternative model combinations](#-alternative-model-combinations) (e.g., GLM + GPT, GLM + MiniMax) — no Claude API required.
+A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin for autonomous ML research workflows. Orchestrates **cross-model collaboration** — Claude Code drives the research while an external LLM (via [Codex](https://github.com/openai/codex), through [codex-bridge](codex-bridge/README.md)) acts as a critical reviewer. Also supports [alternative model combinations](#-alternative-model-combinations) (e.g., GLM + GPT, GLM + MiniMax) — no Claude API required.
 
 > **Why cross-model?** A single model reviewing its own output creates blind spots. Two complementary models — Claude Code (Fable 5) for solid execution, GPT-5.6 Sol xhigh for rigorous critique — produce better outcomes than either alone. Going from 1 to 2 models is the biggest gain; adding more gives diminishing returns.
 
@@ -17,10 +17,10 @@ A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin for auton
 git clone https://github.com/llv23/AutoResearchWithEyes.git
 cd AutoResearchWithEyes
 
-# 2. Set up Codex MCP (for cross-model review)
+# 2. Set up Codex (cross-model reviewer) — any Codex >= 0.154
 npm install -g @openai/codex
-codex auth login
-# Codex MCP auto-configures from .mcp.json when running in the project directory
+codex login
+codex-bridge/bin/codex-bridge selftest   # verifies reviewer calls + approval gate end to end
 
 # 3. Launch Claude Code — skills and commands are auto-discovered
 claude
@@ -69,7 +69,7 @@ See [Setup](#%EF%B8%8F-setup) for full details.
 
 - **10 composable skills** — atomic building blocks: literature search, idea generation, novelty check, experiments, paper writing
 - **4 workflow commands** — orchestrate skills + agents into end-to-end pipelines (`/autor.idea-discovery`, `/autor.auto-review-loop`, `/autor.paper-writing`, `/autor.research-pipeline`)
-- **2 specialized agents** — `research-reviewer` (senior ML reviewer via Codex MCP) and `paper-improver` (2-round auto-improvement)
+- **2 specialized agents** — `research-reviewer` (senior ML reviewer via codex-bridge) and `paper-improver` (2-round auto-improvement)
 - **Cross-model collaboration** — Claude Code (Fable 5) executes, GPT-5.6 Sol xhigh reviews. Adversarial, not self-play
 - **Centralized configuration** — all constants in `CLAUDE.md`, override per-invocation with inline arguments
 - **Venue templates** — bundled template directories with fallback resolution: `TEMPLATE_DIR/VENUE/` → bundled → error with instructions
@@ -83,7 +83,7 @@ See [Setup](#%EF%B8%8F-setup) for full details.
 ```
 AutoResearchWithEyes/
 ├── CLAUDE.md                    # Centralized constants (single source of truth)
-├── .mcp.json                    # Auto-configures Codex MCP server
+├── codex-bridge/                # Standalone reviewer-call component: Codex CLI adapter + approval gate
 ├── .claude-plugin/
 │   └── plugin.json              # Plugin metadata (name, version, author)
 ├── skills/                      # 10 atomic building blocks (auto-discovered)
@@ -103,7 +103,7 @@ AutoResearchWithEyes/
 │   ├── paper-writing.md         # plan → figures → write → compile → improver
 │   └── research-pipeline.md     # meta-pipeline: idea → implement → review
 ├── agents/                      # 2 specialized personas
-│   ├── research-reviewer.md     # Senior ML reviewer via Codex MCP (GPT-5.6 Sol xhigh)
+│   ├── research-reviewer.md     # Senior ML reviewer via codex-bridge (GPT-5.6 Sol xhigh)
 │   └── paper-improver.md        # 2-round auto-improvement loop
 └── templates/                   # Venue-specific LaTeX style files
     ├── iclr2026/
@@ -282,7 +282,7 @@ The mandatory human gate ensures you review and approve the selected idea before
 
 ### Skills (10 building blocks)
 
-| Skill | Description | Needs Codex MCP? |
+| Skill | Description | Needs Codex (reviewer)? |
 |-------|-------------|-----------------|
 | [`research-lit`](skills/research-lit/SKILL.md) | Literature search: arXiv TeX sources, local PDFs, web search | No |
 | [`idea-creator`](skills/idea-creator/SKILL.md) | Generate and rank 8-12 research ideas given a direction | Yes |
@@ -308,8 +308,8 @@ The mandatory human gate ensures you review and approve the selected idea before
 
 | Agent | Description | Model |
 |-------|-------------|-------|
-| [`research-reviewer`](agents/research-reviewer.md) | Senior ML reviewer — multi-round critical feedback on ideas, papers, results | GPT-5.6 Sol xhigh via Codex MCP |
-| [`paper-improver`](agents/paper-improver.md) | 2-round auto-improvement: review → fix → recompile. State via PAPER_IMPROVEMENT_STATE.json | GPT-5.6 Sol xhigh via Codex MCP |
+| [`research-reviewer`](agents/research-reviewer.md) | Senior ML reviewer — multi-round critical feedback on ideas, papers, results | GPT-5.6 Sol xhigh via codex-bridge |
+| [`paper-improver`](agents/paper-improver.md) | 2-round auto-improvement: review → fix → recompile. State via PAPER_IMPROVEMENT_STATE.json | GPT-5.6 Sol xhigh via codex-bridge |
 
 ---
 
@@ -323,10 +323,9 @@ The mandatory human gate ensures you review and approve the selected idea before
    npm install -g @openai/codex
    codex auth login
    ```
-   Codex MCP is auto-configured via `.mcp.json` (project-level). To also make it available globally:
-   ```bash
-   claude mcp add codex -s user -- codex mcp-server
-   ```
+   Skills call Codex through [`codex-bridge/`](codex-bridge/README.md) (`codex exec` under a
+   bridge-owned `CODEX_HOME`; no MCP server needed — `codex mcp-server` was removed in Codex 0.154).
+   Verify with `codex-bridge/bin/codex-bridge selftest`.
 3. (For paper writing) **LaTeX** environment with `latexmk` and `pdfinfo`:
    ```bash
    # macOS
@@ -380,7 +379,7 @@ cp -r skills/* ~/.claude/skills/
 cp -r commands/* ~/.claude/commands/
 ```
 
-The Codex MCP server auto-configures from `.mcp.json` (project-level) when running from the project directory. You can also add it at user scope (`claude mcp add codex -s user -- codex mcp-server`) to make it available in all projects — both can coexist.
+Copied skills still call the reviewer through this repo's `codex-bridge/bin/codex-bridge`, so keep the clone in place.
 
 **Option D: Symbolic Installation**
 
@@ -516,8 +515,7 @@ To run without permission prompts, add to `.claude/settings.local.json`:
 {
   "permissions": {
     "allow": [
-      "mcp__codex__codex",
-      "mcp__codex__codex-reply",
+      "Bash(/path/to/AutoResearchWithEyes/codex-bridge/bin/codex-bridge:*)",
       "Write",
       "Edit",
       "Skill(auto-review-loop)"
@@ -554,7 +552,7 @@ All constants live in `CLAUDE.md` at the repo root. Edit to customize:
 
 | Constant | Default | Description |
 |----------|---------|-------------|
-| `REVIEWER_MODEL` | `gpt-5.4` | Model used via Codex MCP |
+| `REVIEWER_MODEL` | `gpt-5.6-sol` | Model used via codex-bridge |
 | `PILOT_MAX_HOURS` | `2` | Max hours per pilot idea |
 | `PILOT_TIMEOUT_HOURS` | `3` | Hard timeout for pilots |
 | `MAX_PILOT_IDEAS` | `3` | Ideas piloted in parallel |
@@ -582,10 +580,16 @@ Override per-invocation with inline arguments:
 
 Don't have Claude / OpenAI API? Swap in other models — same cross-model architecture, different providers.
 
+> codex-bridge's approval gate calls `claude -p`, which follows the executor's
+> `ANTHROPIC_BASE_URL`; set `CODEX_BRIDGE_APPROVER_MODEL` to a model that provider serves
+> (e.g. `glm-4.7`), otherwise every gated command is denied (fail closed). Alt B's
+> `CODEX_*` reviewer variables are passed through to Codex unchanged but have not been
+> re-verified with codex-bridge.
+
 | Role | Default | Alt A: GLM + GPT | Alt B: GLM + MiniMax |
 |------|---------|-------------------|----------------------|
 | Executor (Claude Code) | Claude Fable 5 | GLM-5 (ZhiPu API) | GLM-5 (ZhiPu API) |
-| Reviewer (Codex MCP) | GPT-5.6 Sol | GPT-5.6 Sol (OpenAI API) | MiniMax-M2.5 (MiniMax API) |
+| Reviewer (codex-bridge) | GPT-5.6 Sol | GPT-5.6 Sol (OpenAI API) | MiniMax-M2.5 (MiniMax API) |
 | Need OpenAI API? | Yes | Yes | **No** |
 
 <details>
@@ -600,13 +604,6 @@ Don't have Claude / OpenAI API? Swap in other models — same cross-model archit
         "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
         "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-4.7",
         "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5"
-    },
-    "mcpServers": {
-        "codex": {
-            "command": "codex",
-            "args": ["mcp-server"],
-            "type": "stdio"
-        }
     }
 }
 ```
@@ -628,13 +625,6 @@ Don't have Claude / OpenAI API? Swap in other models — same cross-model archit
         "CODEX_API_KEY": "your_minimax_api_key",
         "CODEX_API_BASE": "https://api.minimax.chat/v1/",
         "CODEX_MODEL": "MiniMax-M2.5"
-    },
-    "mcpServers": {
-        "codex": {
-            "command": "codex",
-            "args": ["mcp-server"],
-            "type": "stdio"
-        }
     }
 }
 ```

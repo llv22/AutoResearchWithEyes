@@ -1,8 +1,8 @@
 ---
 name: autor.auto-review-loop
-description: Autonomous multi-round research review loop. Repeatedly reviews via Codex MCP, implements fixes, and re-reviews until positive assessment or max rounds reached. Use when user says "auto review loop", "review until it passes", or wants autonomous iterative improvement.
+description: Autonomous multi-round research review loop. Repeatedly reviews via codex-bridge, implements fixes, and re-reviews until positive assessment or max rounds reached. Use when user says "auto review loop", "review until it passes", or wants autonomous iterative improvement.
 argument-hint: [topic-or-scope]
-allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, Agent, Skill, mcp__codex__codex, mcp__codex__codex-reply
+allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, Agent, Skill
 ---
 
 # Auto Review Loop: Autonomous Research Improvement
@@ -64,9 +64,7 @@ Long-running loops may hit the context window limit, triggering automatic compac
 Send comprehensive context to the external reviewer:
 
 ```
-mcp__codex__codex:
-  model: REVIEWER_MODEL
-  config: {"model_reasoning_effort": "xhigh"}
+REVIEWER_CALL new
   prompt: |
     [Round N/MAX_ROUNDS of autonomous review loop]
 
@@ -83,7 +81,7 @@ mcp__codex__codex:
     Be brutally honest. If the work is ready, say so clearly.
 ```
 
-If this is round 2+, use `mcp__codex__codex-reply` with the saved threadId to maintain conversation context.
+If this is round 2+, use `REVIEWER_CALL reply` with the saved threadId to maintain conversation context.
 
 #### Phase B: Parse Assessment
 
@@ -167,8 +165,8 @@ When loop ends (positive assessment or max rounds):
 
 ## Key Rules
 
-- ALWAYS use `config: {"model_reasoning_effort": "xhigh"}` for maximum reasoning depth
-- Save threadId from first call, use `mcp__codex__codex-reply` for subsequent rounds
+- Keep the bridge default effort (xhigh) for maximum reasoning depth — never lower it
+- Save threadId from first call, use `REVIEWER_CALL reply` for subsequent rounds
 - Be honest — include negative results and failed experiments
 - Do NOT hide weaknesses to game a positive score
 - Implement fixes BEFORE re-reviewing (don't just promise to fix)
@@ -179,10 +177,7 @@ When loop ends (positive assessment or max rounds):
 ## Prompt Template for Round 2+
 
 ```
-mcp__codex__codex-reply:
-  threadId: [saved from round 1]
-  model: REVIEWER_MODEL
-  config: {"model_reasoning_effort": "xhigh"}
+REVIEWER_CALL reply --thread [saved from round 1]
   prompt: |
     [Round N update]
 

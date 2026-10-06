@@ -2,7 +2,7 @@
 name: novelty-check
 description: Verify research idea novelty against recent literature. Use when user says "查新", "novelty check", "有没有人做过", "check novelty", or wants to verify a research idea is novel before implementing.
 argument-hint: [method-or-idea-description]
-allowed-tools: WebSearch, WebFetch, Grep, Read, Glob, mcp__codex__codex
+allowed-tools: Bash(*), WebSearch, WebFetch, Grep, Read, Glob
 ---
 
 # Novelty Check Skill
@@ -41,11 +41,11 @@ For EACH core claim, search using ALL available sources:
 3. **Read abstracts**: For each potentially overlapping paper, WebFetch its abstract and related work section
 
 ### Phase C: Cross-Model Verification
-Call REVIEWER_MODEL via Codex MCP (`mcp__codex__codex`) with xhigh reasoning **and web search
+Call REVIEWER_MODEL via codex-bridge (`REVIEWER_CALL new --web`) with xhigh reasoning **and web search
 enabled** — novelty verdicts must be able to check the live literature, not just training
 priors (still light search, not a deep-research pass):
 ```
-config: {"model_reasoning_effort": "xhigh", "tools": {"web_search": true}}
+REVIEWER_CALL new --web
 ```
 Prompt should include:
 - The proposed method description
